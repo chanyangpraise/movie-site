@@ -1,0 +1,14 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #141414;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 4rem;
+  width: 100%;
+  background-color: #141414;
+}

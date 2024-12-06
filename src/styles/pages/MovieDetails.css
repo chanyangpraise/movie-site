@@ -1,0 +1,190 @@
+/* src/styles/pages/MovieDetails.css */
+.movie-details-container {
+  position: relative;
+  min-height: 100vh;
+  color: white;
+  padding-top: 60px; /* For fixed navbar */
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 3rem;
+  padding: 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.poster {
+  flex-shrink: 0;
+}
+
+.poster img {
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.poster img:hover {
+  transform: scale(1.02);
+}
+
+.info {
+  flex: 1;
+}
+
+.info h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.meta {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  color: #cccccc;
+  font-size: 1.1rem;
+}
+
+.meta span {
+  position: relative;
+}
+
+.meta span:not(:last-child)::after {
+  content: "•";
+  position: absolute;
+  right: -1rem;
+  color: #666;
+}
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.genre-tag {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.genre-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tagline {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #cccccc;
+  margin: 1.5rem 0;
+  line-height: 1.6;
+}
+
+.overview {
+  margin: 2rem 0;
+}
+
+.overview h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.overview p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #cccccc;
+}
+
+.additional-info {
+  margin-top: 3rem;
+  display: grid;
+  gap: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-item h4 {
+  font-size: 1.1rem;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+
+.info-item span {
+  color: #ffffff;
+}
+
+.rating {
+  color: #ffd700 !important;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content {
+    padding: 2rem;
+  }
+
+  .poster img {
+    max-width: 250px;
+  }
+
+  .info h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  .poster {
+    display: flex;
+    justify-content: center;
+  }
+
+  .poster img {
+    max-width: 300px;
+  }
+
+  .meta {
+    flex-wrap: wrap;
+  }
+
+  .meta span:not(:last-child)::after {
+    display: none;
+  }
+}
+
+/* Animation for content loading */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  animation: fadeIn 0.5s ease-out;
+}
