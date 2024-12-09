@@ -4,10 +4,10 @@ const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
 export const movieService = {
-  getMovies: async () => {
+  getMovies: async (page = 1) => {
     try {
       const response = await fetch(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR`
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=${page}`
       );
       
       if (!response.ok) {
@@ -15,10 +15,10 @@ export const movieService = {
       }
       
       const data = await response.json();
-      return data.results; // 결과를 그대로 반환하고 필터링은 useMovies에서 처리
+      return data; // 전체 응답 반환 (results와 페이지 정보 포함)
     } catch (error) {
       console.error('Error fetching movies:', error);
-      throw error; // 에러를 상위로 전파하여 useMovies에서 처리
+      throw error;
     }
   },
 

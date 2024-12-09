@@ -1,33 +1,47 @@
 // src/hooks/useMovies.js
-import { useState, useEffect } from "react";
-import { movieService } from "../services/movieService";
+import { useState, useEffect, useCallback } from 'react';
+import { movieService } from '../services/movieService';
 
 export const useMovies = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const fetchMovies = useCallback(async () => {
+    try {
+      if (!hasMore && !initialLoad) return;
+      
+      setLoading(true);
+      const data = await movieService.getMovies(page);
+      
+      const filteredMovies = data.results.filter(movie => !movie.adult);
+      
+      setMovies(prev => {
+        if (page === 1) return filteredMovies;
+        return [...prev, ...filteredMovies];
+      });
+      
+      setHasMore(page < data.total_pages);
+      setInitialLoad(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, hasMore, initialLoad]);
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        setLoading(true);
-        const data = await movieService.getMovies();
-        // adult가 false인 영화만 필터링
-        const filteredMovies = data.filter(movie => !movie.adult);
-        setMovies(filteredMovies);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMovies();
-  }, []); // 컴포넌트 마운트 시에만 실행
+  }, [fetchMovies]);
 
-  return {
-    movies,
-    loading,
-    error,
-  };
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  }, [loading, hasMore]);
+
+  return { movies, loading, error, loadMore, hasMore };
 };
