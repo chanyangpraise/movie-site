@@ -10,7 +10,7 @@ const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/details");
+    navigate(`/movie/${movie.id}`);
   };
 
   return (
@@ -23,10 +23,8 @@ const MovieCard = ({ movie }) => {
         className="movie-poster"
       />
       <div className="movie-info">
-        <h2 className="movie-title">{movie.title}</h2>
-        <span className="movie-rating">
-          평점: {formatRating(movie.vote_average)}
-        </span>
+        <h3>{movie.title}</h3>
+        <p className="rating">⭐️ {formatRating(movie.vote_average)}</p>
       </div>
     </div>
   );
@@ -38,7 +36,7 @@ MovieCard.propTypes = {
     title: PropTypes.string.isRequired,
     poster_path: PropTypes.string,
     backdrop_path: PropTypes.string,
-    vote_average: PropTypes.number.isRequired,
+    vote_average: PropTypes.number,
   }).isRequired,
 };
 
