@@ -50,7 +50,6 @@
 
 .movie-rating {
   position: absolute;
-  top: -2rem;
   right: 1rem;
   background: rgba(0, 0, 0, 0.8);
   color: #ffd700;

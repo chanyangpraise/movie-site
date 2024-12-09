@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useMovies } from '../hooks/useMovies';
 import MovieCard from '../components/MovieCard';
+import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import '../styles/pages/Home.css';
+
+const SKELETON_COUNT = 12; // Number of skeleton cards to show
 
 const Home = () => {
   const { movies, loading, error, loadMore, hasMore } = useMovies();
@@ -40,8 +43,8 @@ const Home = () => {
         loadMore();
       }
     }, {
-      rootMargin: '100px', // Start loading earlier
-      threshold: 0.1 // Trigger when even 10% of the element is visible
+      rootMargin: '100px',
+      threshold: 0.1
     });
     
     if (node) observer.current.observe(node);
@@ -55,39 +58,55 @@ const Home = () => {
     );
   }
 
+  const renderSkeletons = () => {
+    return Array(SKELETON_COUNT)
+      .fill(null)
+      .map((_, index) => (
+        <div key={`skeleton-${index}`} className="movie-enter movie-enter-active">
+          <MovieCardSkeleton />
+        </div>
+      ));
+  };
+
   return (
     <div className="home-container">
       <div className="movies-grid">
-        {movies.map((movie, index) => {
-          const uniqueKey = `${movie.id}-${index}`;
-          
-          if (movies.length === index + 1) {
-            return (
-              <div 
-                ref={lastMovieElementRef} 
-                key={uniqueKey}
-                className="movie-enter movie-enter-active"
-              >
-                <MovieCard movie={movie} />
-              </div>
-            );
-          } else {
-            return (
-              <div 
-                key={uniqueKey}
-                className="movie-enter movie-enter-active"
-              >
-                <MovieCard movie={movie} />
-              </div>
-            );
-          }
-        })}
+        {movies.length === 0 && loading ? (
+          renderSkeletons()
+        ) : (
+          <>
+            {movies.map((movie, index) => {
+              const uniqueKey = `${movie.id}-${index}`;
+              
+              if (movies.length === index + 1) {
+                return (
+                  <div 
+                    ref={lastMovieElementRef} 
+                    key={uniqueKey}
+                    className="movie-enter movie-enter-active"
+                  >
+                    <MovieCard movie={movie} />
+                  </div>
+                );
+              } else {
+                return (
+                  <div 
+                    key={uniqueKey}
+                    className="movie-enter movie-enter-active"
+                  >
+                    <MovieCard movie={movie} />
+                  </div>
+                );
+              }
+            })}
+            {loading && (
+              <>
+                {renderSkeletons()}
+              </>
+            )}
+          </>
+        )}
       </div>
-      {loading && (
-        <div className="loading-container">
-          <div className="loading-spinner" />
-        </div>
-      )}
       {!hasMore && !loading && movies.length > 0 && (
         <div className="loading-container">
           <p>No more movies to load</p>
