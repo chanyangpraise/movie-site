@@ -1,5 +1,5 @@
 // src/hooks/useMovies.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { movieService } from '../services/movieService';
 
 // Keywords that might indicate adult content
@@ -28,65 +28,107 @@ const isAdultContent = (movie) => {
 };
 
 export const useMovies = () => {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [movies, setMovies] = useState(() => {
+    const savedMovies = sessionStorage.getItem('movies');
+    return savedMovies ? JSON.parse(savedMovies) : [];
+  });
+  
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => {
+    return parseInt(sessionStorage.getItem('currentPage')) || 1;
+  });
   const [hasMore, setHasMore] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const isLoading = useRef(false);
+
+  // Debounced save to sessionStorage to prevent performance impact
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      sessionStorage.setItem('movies', JSON.stringify(movies));
+      sessionStorage.setItem('currentPage', page.toString());
+    }, 1000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [movies, page]);
 
   const fetchMovies = useCallback(async () => {
+    if (isLoading.current) return;
+    
     try {
-      if (!hasMore && !initialLoad) return;
-      
+      isLoading.current = true;
       setLoading(true);
-      const data = await movieService.getMovies(page);
       
-      // Enhanced filtering
-      const filteredMovies = data.results.filter(movie => 
-        // Basic requirements
+      // Start fetching next page early
+      const nextPage = page + 1;
+      const [currentData, nextData] = await Promise.all([
+        movieService.getMovies(page),
+        hasMore ? movieService.getMovies(nextPage) : Promise.resolve(null)
+      ]);
+      
+      // Process current page
+      const filteredMovies = currentData.results.filter(movie => 
         movie.poster_path &&
         movie.vote_average >= 0 &&
         movie.overview &&
-        // Content filtering
         !isAdultContent(movie) &&
-        // Ensure reasonable vote count for reliability
         movie.vote_count >= 50
       );
       
+      // Process next page if available
+      let nextFilteredMovies = [];
+      if (nextData) {
+        nextFilteredMovies = nextData.results.filter(movie => 
+          movie.poster_path &&
+          movie.vote_average >= 0 &&
+          movie.overview &&
+          !isAdultContent(movie) &&
+          movie.vote_count >= 50
+        );
+      }
+      
       setMovies(prev => {
-        if (page === 1) return filteredMovies;
-        
-        // Remove any duplicates when adding new movies
         const newMovies = [...prev];
-        filteredMovies.forEach(movie => {
-          if (!newMovies.some(m => m.id === movie.id)) {
-            newMovies.push(movie);
-          }
-        });
+        const addMovies = (moviesToAdd) => {
+          moviesToAdd.forEach(movie => {
+            if (!newMovies.some(m => m.id === movie.id)) {
+              newMovies.push(movie);
+            }
+          });
+        };
+        
+        addMovies(filteredMovies);
+        if (nextFilteredMovies.length > 0) {
+          addMovies(nextFilteredMovies);
+          setPage(nextPage);
+        }
+        
         return newMovies;
       });
+
+      // Update hasMore based on both current and next page results
+      const totalResults = currentData.total_results;
+      const totalPages = Math.ceil(totalResults * (filteredMovies.length / currentData.results.length));
+      setHasMore(page < totalPages && nextFilteredMovies.length > 0);
       
-      // Adjust hasMore based on available filtered movies
-      const totalFilteredPages = Math.ceil(data.total_results * (filteredMovies.length / data.results.length));
-      setHasMore(page < totalFilteredPages);
-      setInitialLoad(false);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+      isLoading.current = false;
     }
-  }, [page, hasMore, initialLoad]);
+  }, [page, hasMore]);
 
   useEffect(() => {
-    fetchMovies();
-  }, [fetchMovies]);
+    if (movies.length === 0) {
+      fetchMovies();
+    }
+  }, [fetchMovies, movies.length]);
 
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setPage(prev => prev + 1);
+    if (!loading && hasMore && !isLoading.current) {
+      fetchMovies();
     }
-  }, [loading, hasMore]);
+  }, [loading, hasMore, fetchMovies]);
 
   return { movies, loading, error, loadMore, hasMore };
 };
