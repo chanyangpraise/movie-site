@@ -7,7 +7,7 @@ export const movieService = {
   getMovies: async (page = 1) => {
     try {
       const response = await fetch(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=${page}`
+        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=${page}&include_adult=false&certification_country=US&certification.lte=PG-13`
       );
       
       if (!response.ok) {
@@ -25,7 +25,7 @@ export const movieService = {
   getMovieDetail: async (movieId) => {
     try {
       const response = await fetch(
-        `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=ko-KR`
+        `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=ko-KR&include_adult=false`
       );
       if (!response.ok) {
         throw new Error(`Failed to fetch movie details: ${response.status}`);
