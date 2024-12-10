@@ -8,15 +8,18 @@
 .featured-movie {
 	position: relative;
 	width: 100%;
-	height: 450px; /* Increase height for a larger image */
+	height: 60vh; /* Increase height for a larger image */
 	overflow: hidden;
+  border: none;
+  background: transparent;
 }
 
 .featured-movie img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	transition: opacity 0.5s ease-in-out;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the container */
+  transition: opacity 0.5s ease-in-out; /* Transition for opacity */
+  opacity: {imageOpacity}; /* Use the state variable for opacity */
 }
 
 .featured-info {

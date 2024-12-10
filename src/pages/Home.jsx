@@ -16,6 +16,8 @@ const Home = () => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
 	const debouncedSearchQuery = useDebounce(searchQuery, 500);
+	// smooth transitions
+	const [imageOpacity, setImageOpacity] = useState(1);
 
 	// Fetch top 10 popular movies
 	const [featuredMovies, setFeaturedMovies] = useState([]);
@@ -37,10 +39,14 @@ const Home = () => {
 	useEffect(() => {
 		if (featuredMovies.length > 0 && isCycling) {
 			const interval = setInterval(() => {
-				setCurrentFeaturedIndex(
-					(prevIndex) => (prevIndex + 1) % featuredMovies.length
-				);
-			}, 5000); // Change featured movie every 5 seconds
+				setImageOpacity(0); // Start fading out
+				setTimeout(() => {
+					setCurrentFeaturedIndex(
+						(prevIndex) => (prevIndex + 1) % featuredMovies.length
+					);
+					setImageOpacity(1); // Fade in the new movie
+				}, 500); // Match this duration with the CSS transition duration
+			}, 10000); // Change featured movie every 10 seconds
 
 			return () => clearInterval(interval); // Cleanup on unmount
 		}
@@ -141,13 +147,11 @@ const Home = () => {
 					<img
 						src={`https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path}`}
 						alt={featuredMovie.title}
+						style={{ opacity: imageOpacity }}
 					/>
 					<div className="featured-info">
 						<h2>{featuredMovie.title}</h2>
 						<p>{featuredMovie.overview}</p>
-						<button className="play-button" onClick={toggleCycling}>
-							{isCycling ? <FaPause /> : <FaPlay />}
-						</button>
 					</div>
 				</div>
 			)}
