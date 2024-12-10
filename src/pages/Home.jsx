@@ -16,6 +16,21 @@ const Home = () => {
 	const [searchResults, setSearchResults] = useState([]);
 	const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+	// Fetch most popular movie
+	const [featuredMovie, setFeaturedMovie] = useState(null);
+
+	useEffect(() => {
+		const fetchFeaturedMovie = async () => {
+			try {
+				const response = await movieService.getMovies(); // Assuming this fetches popular movies
+				setFeaturedMovie(response.results[0]); // Set the first movie as featured
+			} catch (error) {
+				console.error('Error fetching featured movie:', error);
+			}
+		};
+		fetchFeaturedMovie();
+	}, []);
+
 	// Save scroll position before unmounting
 	useEffect(() => {
 		scrollPosition.current = sessionStorage.getItem('scrollPosition')
@@ -74,7 +89,6 @@ const Home = () => {
 				setSearchResults([]); // Clear results if the search query is empty
 			}
 		};
-
 		fetchSearchResults();
 	}, [debouncedSearchQuery]);
 
@@ -101,6 +115,16 @@ const Home = () => {
 
 	return (
 		<div className="home-container">
+			{featuredMovie && (
+				<div className="featured-movie">
+					<img src={`https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path}`} alt={featuredMovie.title} />
+					<div className="featured-info">
+						<h2>{featuredMovie.title}</h2>
+						<p>{featuredMovie.overview}</p>
+						<button>Play</button>
+					</div>
+				</div>
+			)}
 			<div className="search-container">
 				<input
 					type="text"
@@ -119,34 +143,32 @@ const Home = () => {
 				) : movies.length === 0 && loading ? (
 					renderSkeletons()
 				) : (
-					<>
-						{movies.map((movie, index) => {
-							const uniqueKey = `${movie.id}-${index}`;
+					movies.map((movie, index) => {
+						const uniqueKey = `${movie.id}-${index}`;
 
-							if (movies.length === index + 1) {
-								return (
-									<div
-										ref={lastMovieElementRef}
-										key={uniqueKey}
-										className="movie-enter movie-enter-active"
-									>
-										<MovieCard movie={movie} />
-									</div>
-								);
-							} else {
-								return (
-									<div
-										key={uniqueKey}
-										className="movie-enter movie-enter-active"
-									>
-										<MovieCard movie={movie} />
-									</div>
-								);
-							}
-						})}
-						{loading && <>{renderSkeletons()}</>}
-					</>
+						if (movies.length === index + 1) {
+							return (
+								<div
+									ref={lastMovieElementRef}
+									key={uniqueKey}
+									className="movie-enter movie-enter-active"
+								>
+									<MovieCard movie={movie} />
+								</div>
+							);
+						} else {
+							return (
+								<div
+									key={uniqueKey}
+									className="movie-enter movie-enter-active"
+								>
+									<MovieCard movie={movie} />
+								</div>
+							);
+						}
+					})
 				)}
+				{loading && <>{renderSkeletons()}</>}
 			</div>
 			{!hasMore && !loading && movies.length > 0 && (
 				<div className="loading-container">
