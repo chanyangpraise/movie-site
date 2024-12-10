@@ -5,6 +5,7 @@ import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import '../styles/pages/Home.css';
 import { movieService } from '../services/movieService';
 import useDebounce from '../hooks/useDebounce';
+import { FaPlay, FaPause } from 'react-icons/fa';
 
 const SKELETON_COUNT = 12; // Number of skeleton cards to show
 
@@ -16,20 +17,36 @@ const Home = () => {
 	const [searchResults, setSearchResults] = useState([]);
 	const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-	// Fetch most popular movie
-	const [featuredMovie, setFeaturedMovie] = useState(null);
+	// Fetch top 10 popular movies
+	const [featuredMovies, setFeaturedMovies] = useState([]);
+	const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+	const [isCycling, setIsCycling] = useState(true);
 
 	useEffect(() => {
-		const fetchFeaturedMovie = async () => {
+		const fetchFeaturedMovies = async () => {
 			try {
-				const response = await movieService.getMovies(); // Assuming this fetches popular movies
-				setFeaturedMovie(response.results[0]); // Set the first movie as featured
+				const response = await movieService.getMovies(); // Fetch top 10 popular movies
+				setFeaturedMovies(response.results.slice(0, 10)); // Store top 10 movies
 			} catch (error) {
-				console.error('Error fetching featured movie:', error);
+				console.error('Error fetching featured movies:', error);
 			}
 		};
-		fetchFeaturedMovie();
+		fetchFeaturedMovies();
 	}, []);
+
+	useEffect(() => {
+		if (featuredMovies.length > 0 && isCycling) {
+			const interval = setInterval(() => {
+				setCurrentFeaturedIndex(
+					(prevIndex) => (prevIndex + 1) % featuredMovies.length
+				);
+			}, 5000); // Change featured movie every 5 seconds
+
+			return () => clearInterval(interval); // Cleanup on unmount
+		}
+	}, [featuredMovies, isCycling]);
+
+	const featuredMovie = featuredMovies[currentFeaturedIndex]; // Get the current featured movie
 
 	// Save scroll position before unmounting
 	useEffect(() => {
@@ -113,15 +130,24 @@ const Home = () => {
 			));
 	};
 
+	const toggleCycling = () => {
+		setIsCycling((prev) => !prev);
+	};
+
 	return (
 		<div className="home-container">
 			{featuredMovie && (
 				<div className="featured-movie">
-					<img src={`https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path}`} alt={featuredMovie.title} />
+					<img
+						src={`https://image.tmdb.org/t/p/original${featuredMovie.backdrop_path}`}
+						alt={featuredMovie.title}
+					/>
 					<div className="featured-info">
 						<h2>{featuredMovie.title}</h2>
 						<p>{featuredMovie.overview}</p>
-						<button>Play</button>
+						<button className="play-button" onClick={toggleCycling}>
+							{isCycling ? <FaPause /> : <FaPlay />}
+						</button>
 					</div>
 				</div>
 			)}
@@ -134,40 +160,38 @@ const Home = () => {
 				/>
 			</div>
 			<div className="movies-grid">
-				{searchResults.length > 0 ? (
-					searchResults.map((movie) => (
-						<div key={movie.id} className="movie-enter movie-enter-active">
-							<MovieCard movie={movie} />
-						</div>
-					))
-				) : movies.length === 0 && loading ? (
-					renderSkeletons()
-				) : (
-					movies.map((movie, index) => {
-						const uniqueKey = `${movie.id}-${index}`;
+				{searchResults.length > 0
+					? searchResults.map((movie) => (
+							<div key={movie.id} className="movie-enter movie-enter-active">
+								<MovieCard movie={movie} />
+							</div>
+					  ))
+					: movies.length === 0 && loading
+					? renderSkeletons()
+					: movies.map((movie, index) => {
+							const uniqueKey = `${movie.id}-${index}`;
 
-						if (movies.length === index + 1) {
-							return (
-								<div
-									ref={lastMovieElementRef}
-									key={uniqueKey}
-									className="movie-enter movie-enter-active"
-								>
-									<MovieCard movie={movie} />
-								</div>
-							);
-						} else {
-							return (
-								<div
-									key={uniqueKey}
-									className="movie-enter movie-enter-active"
-								>
-									<MovieCard movie={movie} />
-								</div>
-							);
-						}
-					})
-				)}
+							if (movies.length === index + 1) {
+								return (
+									<div
+										ref={lastMovieElementRef}
+										key={uniqueKey}
+										className="movie-enter movie-enter-active"
+									>
+										<MovieCard movie={movie} />
+									</div>
+								);
+							} else {
+								return (
+									<div
+										key={uniqueKey}
+										className="movie-enter movie-enter-active"
+									>
+										<MovieCard movie={movie} />
+									</div>
+								);
+							}
+					  })}
 				{loading && <>{renderSkeletons()}</>}
 			</div>
 			{!hasMore && !loading && movies.length > 0 && (
