@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useMovies } from '../hooks/useMovies';
 import MovieCard from '../components/MovieCard';
 import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import '../styles/pages/Home.css';
+import { movieService } from '../services/movieService';
+import useDebounce from '../hooks/useDebounce';
 
 const SKELETON_COUNT = 12; // Number of skeleton cards to show
 
@@ -10,6 +12,9 @@ const Home = () => {
 	const { movies, loading, error, loadMore, hasMore } = useMovies();
 	const observer = useRef();
 	const scrollPosition = useRef(0);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [searchResults, setSearchResults] = useState([]);
+	const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
 	// Save scroll position before unmounting
 	useEffect(() => {
@@ -56,6 +61,23 @@ const Home = () => {
 		[loading, hasMore, loadMore]
 	);
 
+	useEffect(() => {
+		const fetchSearchResults = async () => {
+			if (debouncedSearchQuery) {
+				try {
+					const results = await movieService.searchMovies(debouncedSearchQuery);
+					setSearchResults(results);
+				} catch (error) {
+					console.error('Error fetching search results:', error);
+				}
+			} else {
+				setSearchResults([]); // Clear results if the search query is empty
+			}
+		};
+
+		fetchSearchResults();
+	}, [debouncedSearchQuery]);
+
 	if (error) {
 		return (
 			<div className="error-container">
@@ -79,8 +101,20 @@ const Home = () => {
 
 	return (
 		<div className="home-container">
+			<input
+				type="text"
+				placeholder="Search for a movie..."
+				value={searchQuery}
+				onChange={(e) => setSearchQuery(e.target.value)}
+			/>
 			<div className="movies-grid">
-				{movies.length === 0 && loading ? (
+				{searchResults.length > 0 ? (
+					searchResults.map((movie) => (
+						<div key={movie.id} className="movie-enter movie-enter-active">
+							<MovieCard movie={movie} />
+						</div>
+					))
+				) : movies.length === 0 && loading ? (
 					renderSkeletons()
 				) : (
 					<>
