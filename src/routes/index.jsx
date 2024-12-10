@@ -2,6 +2,8 @@
 import React from "react";
 import Home from "../pages/Home";
 import MovieDetails from "../pages/MovieDetails";
+import Login from '../pages/Login';
+import Profile from '../pages/Profile';
 
 export const routes = [
   {
@@ -11,5 +13,13 @@ export const routes = [
   {
     path: "/movie/:id",
     element: <MovieDetails />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
   },
 ];
