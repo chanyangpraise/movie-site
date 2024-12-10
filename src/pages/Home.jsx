@@ -101,12 +101,14 @@ const Home = () => {
 
 	return (
 		<div className="home-container">
-			<input
-				type="text"
-				placeholder="Search for a movie..."
-				value={searchQuery}
-				onChange={(e) => setSearchQuery(e.target.value)}
-			/>
+			<div className="search-container">
+				<input
+					type="text"
+					placeholder="Search for a movie..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
+			</div>
 			<div className="movies-grid">
 				{searchResults.length > 0 ? (
 					searchResults.map((movie) => (
