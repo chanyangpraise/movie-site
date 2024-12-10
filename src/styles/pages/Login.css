@@ -1,0 +1,53 @@
+/* src/styles/pages/Login.css */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full height of the viewport */
+    background-color: #141414; /* Dark background */
+    color: #ffffff; /* White text color */
+}
+
+.login-container h2 {
+    margin-bottom: 2rem; /* Space below the header */
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    width: 300px; /* Fixed width for the form */
+}
+
+.login-container label {
+    margin-bottom: 0.5rem; /* Space below labels */
+}
+
+.login-container input {
+    padding: 0.75rem;
+    margin-bottom: 1rem; /* Space below inputs */
+    border: none;
+    border-radius: 4px; /* Rounded corners */
+    background: rgba(255, 255, 255, 0.1); /* Light background */
+    color: #ffffff; /* White text color */
+    transition: background 0.3s; /* Transition for background color */
+}
+
+.login-container input:focus {
+    outline: none; /* Remove outline */
+    background: rgba(255, 255, 255, 0.2); /* Darker background on focus */
+}
+
+.login-container button {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px; /* Rounded corners */
+    background: #3498db; /* Button background color */
+    color: #ffffff; /* Button text color */
+    cursor: pointer; /* Pointer cursor */
+    transition: background 0.3s; /* Transition for background color */
+}
+
+.login-container button:hover {
+    background: #2980b9; /* Darker shade on hover */
+}
