@@ -10,6 +10,12 @@ const NavBar = ({ searchQuery, setSearchQuery }) => {
 				<Link to="/" className="nav-logo">
 					Movie Site
 				</Link>
+				<div className="nav-search">
+					<SearchInput
+						searchQuery={searchQuery}
+						setSearchQuery={setSearchQuery}
+					/>
+				</div>
 				<div className="nav-links">
 					<Link to="/" className="nav-link">
 						Home
@@ -20,12 +26,6 @@ const NavBar = ({ searchQuery, setSearchQuery }) => {
 					<Link to="/profile" className="nav-link">
 						Profile
 					</Link>
-				</div>
-				<div className="nav-search">
-					<SearchInput
-						searchQuery={searchQuery}
-						setSearchQuery={setSearchQuery}
-					/>
 				</div>
 			</div>
 		</nav>

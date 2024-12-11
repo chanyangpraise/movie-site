@@ -47,58 +47,9 @@
 	background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Search Bar Styling in Navbar */
-.navbar-search-container {
-	display: flex;
-	align-items: center;
-	position: relative;
-	width: 100%;
-	max-width: 400px;
-	margin-left: auto;
-}
 
-.navbar-search-container input {
-	width: 100%;
-	padding: 0.5rem 1rem;
-	border: none;
-	border-radius: 20px;
-	background-color: #333;
-	color: #ffffff;
-	font-size: 1rem;
-	transition: box-shadow 0.3s ease-in-out;
-}
 
-.navbar-search-container input::placeholder {
-	color: rgba(255, 255, 255, 0.6);
-}
 
-.navbar-search-container input:focus {
-	outline: none;
-	box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
 
-.navbar-search-container .search-icon {
-	position: absolute;
-	right: 10px;
-	color: rgba(255, 255, 255, 0.6);
-	font-size: 1.2rem;
-	pointer-events: none;
-}
 
-/* Responsive Design */
-@media (max-width: 768px) {
-	.navbar-content {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 1rem;
-	}
 
-	.nav-links {
-		width: 100%;
-		justify-content: space-between;
-	}
-
-	.navbar-search-container {
-		width: 100%;
-	}
-}

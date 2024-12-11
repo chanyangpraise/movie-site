@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/components/SearchInput.css';
 
 const SearchInput = ({ searchQuery, setSearchQuery }) => {
 	return (
