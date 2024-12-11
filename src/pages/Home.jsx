@@ -5,18 +5,15 @@ import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import '../styles/pages/Home.css';
 import { movieService } from '../services/movieService';
 import useDebounce from '../hooks/useDebounce';
-import { FaPlay, FaPause } from 'react-icons/fa';
 
 const SKELETON_COUNT = 12; // Number of skeleton cards to show
 
-const Home = () => {
+const Home = ({ searchQuery }) => {
 	const { movies, loading, error, loadMore, hasMore } = useMovies();
 	const observer = useRef();
 	const scrollPosition = useRef(0);
-	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
-	const debouncedSearchQuery = useDebounce(searchQuery, 500);
-	// smooth transitions
+	const debouncedSearchQuery = useDebounce(searchQuery, 3000);
 	const [imageOpacity, setImageOpacity] = useState(1);
 
 	// Fetch top 10 popular movies
@@ -54,27 +51,21 @@ const Home = () => {
 
 	const featuredMovie = featuredMovies[currentFeaturedIndex]; // Get the current featured movie
 
-	// Save scroll position before unmounting
 	useEffect(() => {
-		scrollPosition.current = sessionStorage.getItem('scrollPosition')
-			? parseInt(sessionStorage.getItem('scrollPosition'))
-			: 0;
-
-		// Restore scroll position
-		if (scrollPosition.current > 0) {
-			window.scrollTo(0, scrollPosition.current);
-		}
-
-		const handleScroll = () => {
-			sessionStorage.setItem('scrollPosition', window.scrollY.toString());
+		const fetchSearchResults = async () => {
+			if (debouncedSearchQuery) {
+				try {
+					const results = await movieService.searchMovies(debouncedSearchQuery);
+					setSearchResults(results);
+				} catch (error) {
+					console.error('Error fetching search results:', error);
+				}
+			} else {
+				setSearchResults([]); // Clear results if the search query is empty
+			}
 		};
-
-		window.addEventListener('scroll', handleScroll);
-
-		return () => {
-			window.removeEventListener('scroll', handleScroll);
-		};
-	}, []);
+		fetchSearchResults();
+	}, [debouncedSearchQuery]);
 
 	const lastMovieElementRef = useCallback(
 		(node) => {
@@ -98,22 +89,6 @@ const Home = () => {
 		},
 		[loading, hasMore, loadMore]
 	);
-
-	useEffect(() => {
-		const fetchSearchResults = async () => {
-			if (debouncedSearchQuery) {
-				try {
-					const results = await movieService.searchMovies(debouncedSearchQuery);
-					setSearchResults(results);
-				} catch (error) {
-					console.error('Error fetching search results:', error);
-				}
-			} else {
-				setSearchResults([]); // Clear results if the search query is empty
-			}
-		};
-		fetchSearchResults();
-	}, [debouncedSearchQuery]);
 
 	if (error) {
 		return (
@@ -155,14 +130,6 @@ const Home = () => {
 					</div>
 				</div>
 			)}
-			<div className="search-container">
-				<input
-					type="text"
-					placeholder="Search for a movie..."
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-				/>
-			</div>
 			<div className="movies-grid">
 				{searchResults.length > 0
 					? searchResults.map((movie) => (
