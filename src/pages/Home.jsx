@@ -13,7 +13,7 @@ const Home = ({ searchQuery }) => {
 	const observer = useRef();
 	const scrollPosition = useRef(0);
 	const [searchResults, setSearchResults] = useState([]);
-	const debouncedSearchQuery = useDebounce(searchQuery, 500);
+	const debouncedSearchQuery = useDebounce(searchQuery, 3000);
 	const [imageOpacity, setImageOpacity] = useState(1);
 
 	// Fetch top 10 popular movies
